@@ -1,11 +1,13 @@
 <script>
 	import { onMount } from 'svelte';
  
-  import * as d3 from "d3";
-  import { scaleLinear, scaleOrdinal } from 'd3-scale';
   import { select, selectAll } from "d3-selection";
+  import { scaleLinear, scaleOrdinal } from 'd3-scale';
 	import { drag } from 'd3-drag';
-	import { force } from 'd3-force-graph';
+	import { forceSimulation, forceLink, forceManyBody, forceCenter } from 'd3-force';
+  import { schemeCategory10 } from 'd3-scale-chromatic';
+
+  let d3 = { scaleLinear, scaleOrdinal, schemeCategory10, select, selectAll, drag,  forceSimulation, forceLink, forceManyBody, forceCenter }
 
 	export let graph;
 
@@ -31,19 +33,24 @@
 		[0, 2, 4, 6, 8, 10, 12] :
 		[0, 4, 8, 12];
 
-	onMount(network);
 
-  const links = graph.links.map(d => Object.create(d));
-  const nodes = graph.nodes.map(d => Object.create(d));
+	$: d3xScale = scaleLinear()
+		.domain([padding.left, width - padding.right])
+		.range([padding.left, width - padding.right]);
+
+	$: d3yScale = scaleLinear()
+		.domain([0, height])
+		.range([height - padding.bottom, padding.top]);
+
+  const colourScale = d3.scaleOrdinal(d3.schemeCategory10);
+  
+  $: links = graph.links.map(d => Object.create(d));
+  $: nodes = graph.nodes.map(d => Object.create(d));
+
+  onMount(network);
 
 	function resize() {
 		({ width, height } = svg.getBoundingClientRect());
-  }
-
-  function color()
-  {
-    const scale = scaleOrdinal(); // ??? schemeCategory10
-    return d => scale(d.group);
   }
 
   function dragstarted(d) {
@@ -62,16 +69,6 @@
     d.fx = null;
     d.fy = null;
   }
-    
-    drag()
-      .on("start", dragstarted)
-      .on("drag", dragged)
-      .on("end", dragended);
-
-  const simulation = d3.forceSimulation(nodes)
-      .force("link", d3.forceLink(links).id(d => d.id))
-      .force("charge", d3.forceManyBody())
-      .force("center", d3.forceCenter(width / 2, height / 2));
 
 // let svg
 // TODO integrate with sveltejs svg element
@@ -80,12 +77,34 @@
   // const svg = d3.create("svg")
       // .attr("viewBox", [0, 0, width, height]);
 
-  const fromGraph = function(d){ return graph.d}
+  // const fromGraph = function(d){ return graph.d}
+
+  function ticked() {
+    console.log('ticked()')
+  }
 
   function network() {
-  resize()
+    resize()
 
-  // const link = svg.append("g")
+    console.log('graph: ', graph)
+
+    const simulation = d3.forceSimulation(nodes)
+      .force("link", d3.forceLink(links).id(d => d.id))
+      .force("charge", d3.forceManyBody())
+      .force("center", d3.forceCenter(width / 2, height / 2))
+      .on('tick', function ticked() {		
+					simulation.tick()
+					nodes = [...nodes]
+					links = [...links]
+      });
+
+    const sel = d3.selectAll("circle")
+        .call(d3.drag()
+        .on("start", dragstarted)
+        .on("drag", dragged)
+        .on("end", dragended));
+
+// const link = svg.append("g")
   //     .attr("stroke", "#999")
   //     .attr("stroke-opacity", 0.6)
   //   .selectAll("line")  // ???
@@ -105,7 +124,6 @@
   // node.append("title")
   //     .text(d => d.id);
 
-  // simulation.on("tick", () => {
   //   link
   //       .attr("x1", d => d.source.x)
   //       .attr("y1", d => d.source.y)
@@ -126,7 +144,7 @@
 <svelte:window on:resize='{resize}'/>
 
 <!-- SVG was here -->
-<svg bind:this={svg}>
+<svg bind:this={svg} XviewBox='0 0 {width} {height}'>
 	<g class='axis y-axis'>
 		{#each yTicks as tick}
 			<g class='tick tick-{tick}' transform='translate(0, {yScale(tick)})'>
@@ -144,25 +162,35 @@
 			</g>
 		{/each}
 	</g>
-
-		<circle cx='{xScale(5)}' cy='{yScale(5)}' r='5'/>
-	{#each nodes as point}
-		<circle cx='{xScale(point.x)}' cy='{yScale(point.y)}' r='5'/>
-		<circle cx='{xScale(5)}' cy='{yScale(5)}' r='5'/>
+  
+	{#each links as link}
+    <g stroke='#999' stroke-opacity='0.6'>
+      <line x1='{d3xScale(link.source.x)}' y1='{d3yScale(link.source.y)}' 
+            x2='{d3xScale(link.target.x)}'   y2='{d3yScale(link.target.y)}' 
+            stroke-width='{Math.sqrt(link.value)}'>
+            <title>{link.source.id}</title>
+      </line>
+    </g>
 	{/each}
+
+	{#each nodes as point}
+    <circle class='node' fill='{colourScale(point.group)}' cx='{d3xScale(point.x)}' cy='{d3yScale(point.y)}'>
+    <title>{point.id}</title></circle>
+	{/each}
+
 </svg>
 
 <style>
 	svg {
-		width: 50%;
-		height: 50%;
+		width: 80%;
+		height: 80%;
 		float: left;
 	}
 
 	circle {
-		fill: orange;
-		fill-opacity: 0.6;
-		stroke: rgba(0,0,0,0.5);
+		stroke: #fff;
+    stroke-width: 1.5;
+    r: 5px;
 	}
 
 	.tick line {

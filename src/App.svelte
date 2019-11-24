@@ -1,6 +1,5 @@
 <script>
 	import NetworkGraph from './NetworkGraph.svelte';
-	// import Scatterplot from './Scatterplot.svelte';
 	import data from './data.js';
 </script>
 
