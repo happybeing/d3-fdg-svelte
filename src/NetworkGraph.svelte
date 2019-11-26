@@ -1,13 +1,15 @@
 <script>
 	import { onMount } from 'svelte';
  
-  import { select, selectAll } from "d3-selection";
-  import { scaleLinear, scaleOrdinal } from 'd3-scale';
-	import { drag } from 'd3-drag';
-	import { forceSimulation, forceLink, forceManyBody, forceCenter } from 'd3-force';
-  import { schemeCategory10 } from 'd3-scale-chromatic';
+import * as d3 from 'd3';
+import {event as currentEvent} from 'd3';  
+	import { scaleLinear, scaleOrdinal } from 'd3'// d3-scale';
+  import { schemeCategory10 } from 'd3'//'d3-scale-chromatic';
+  import { select, selectAll } from 'd3'// "d3-selection";
+	import { drag } from 'd3'// 'd3-drag';
+	import { forceSimulation, forceLink, forceManyBody, forceCenter } from 'd3'//'d3-force';
 
-  let d3 = { scaleLinear, scaleOrdinal, schemeCategory10, select, selectAll, drag,  forceSimulation, forceLink, forceManyBody, forceCenter }
+//  let d3 = { scaleLinear, scaleOrdinal, schemeCategory10, select, selectAll, drag,  forceSimulation, forceLink, forceManyBody, forceCenter }
 
 	export let graph;
 
@@ -42,109 +44,81 @@
 		.domain([0, height])
 		.range([height - padding.bottom, padding.top]);
 
-  const colourScale = d3.scaleOrdinal(d3.schemeCategory10);
-  
-  $: links = graph.links.map(d => Object.create(d));
-  $: nodes = graph.nodes.map(d => Object.create(d));
+	$: links = graph.links.map(d => Object.create(d));
+  $: nodes = graph.nodes.map(d => Object.create(d));  
+	
+	const colourScale = d3.scaleOrdinal(d3.schemeCategory10);
 
   onMount(network);
 
 	function resize() {
-		({ width, height } = svg.getBoundingClientRect());
+    ({ width, height } = svg.getBoundingClientRect());
+    console.log('resize()', width, height)
   }
 
-  function dragstarted(d) {
-    if (!d3.event.active) simulation.alphaTarget(0.3).restart();
-    d.fx = d.x;
-    d.fy = d.y;
+function color()
+  {
+    const scale = scaleOrdinal(); // ??? schemeCategory10
+    return d => scale(d.group);
+  }
+
+	let simulation
+  function dragstarted() {
+		const d = currentEvent.subject
+    if (!currentEvent.active) simulation.alphaTarget(0.3).restart();
+    currentEvent.subject.fx = d.x;
+    currentEvent.subject.fy = d.y;
   }
   
-  function dragged(d) {
-    d.fx = d3.event.x;
-    d.fy = d3.event.y;
+  function dragged() {
+		const d = currentEvent.subject
+    d.fx = currentEvent.x;
+    d.fy = currentEvent.y;
   }
   
-  function dragended(d) {
-    if (!d3.event.active) simulation.alphaTarget(0);
+	var canvas = document.querySelector("canvas");
+	
+  function dragended() {
+		const d = currentEvent.subject
+    if (!currentEvent.active) simulation.alphaTarget(0);
     d.fx = null;
     d.fy = null;
   }
 
-// let svg
-// TODO integrate with sveltejs svg element
-  // const svg = d3.select('body').append('svg')
-  
-  // const svg = d3.create("svg")
-      // .attr("viewBox", [0, 0, width, height]);
-
-  // const fromGraph = function(d){ return graph.d}
-
-  function ticked() {
-    console.log('ticked()')
+	function dragsubject() {
+    return simulation.find(currentEvent.x, currentEvent.y);
   }
+    
+  function ticked() {
+    // console.log('ticked()')
+	}
 
   function network() {
     resize()
 
-    console.log('graph: ', graph)
-
-    const simulation = d3.forceSimulation(nodes)
-      .force("link", d3.forceLink(links).id(d => d.id))
-      .force("charge", d3.forceManyBody())
-      .force("center", d3.forceCenter(width / 2, height / 2))
-      .on('tick', function ticked() {		
+  	simulation = d3.forceSimulation(nodes)
+        .force("link", d3.forceLink(links).id(d => d.id))
+        .force("charge", d3.forceManyBody())
+        .force("center", d3.forceCenter(width / 2, height / 2))
+        .on('tick', function ticked() {		
 					simulation.tick()
 					nodes = [...nodes]
-					links = [...links]
-      });
-
-    const sel = d3.selectAll("circle")
-        .call(d3.drag()
-        .on("start", dragstarted)
-        .on("drag", dragged)
-        .on("end", dragended));
-
-// const link = svg.append("g")
-  //     .attr("stroke", "#999")
-  //     .attr("stroke-opacity", 0.6)
-  //   .selectAll("line")  // ???
-  //   .join("line")
-  //     .attr("stroke-width", d => Math.sqrt(d.value));
-
-  // const node = svg.append("g")
-  //     .attr("stroke", "#fff")
-  //     .attr("stroke-width", 1.5)
-  //   .selectAll("circle")
-  //   .data(nodes)
-  //   .join("circle")
-  //     .attr("r", 5)
-  //     .attr("fill", color)
-  //     .call(drag(simulation));
-
-  // node.append("title")
-  //     .text(d => d.id);
-
-  //   link
-  //       .attr("x1", d => d.source.x)
-  //       .attr("y1", d => d.source.y)
-  //       .attr("x2", d => d.target.x)
-  //       .attr("y2", d => d.target.y);
-
-  //   node
-  //       .attr("cx", d => d.x)
-  //       .attr("cy", d => d.y);
-  // });
-
-  // invalidation.then(() => simulation.stop());
-
-  // return svg.node();
+          links = [...links]
+				});
+    d3.select(svg)
+      .call(d3.drag()
+          .container(svg)
+          .subject(dragsubject)
+          .on("start", dragstarted)
+          .on("drag", dragged)
+          .on("end", dragended));
   }
 </script>
 
 <svelte:window on:resize='{resize}'/>
 
 <!-- SVG was here -->
-<svg bind:this={svg} XviewBox='0 0 {width} {height}'>
+<svg bind:this={svg}>
 	<g class='axis y-axis'>
 		{#each yTicks as tick}
 			<g class='tick tick-{tick}' transform='translate(0, {yScale(tick)})'>
@@ -166,15 +140,16 @@
 	{#each links as link}
     <g stroke='#999' stroke-opacity='0.6'>
       <line x1='{d3xScale(link.source.x)}' y1='{d3yScale(link.source.y)}' 
-            x2='{d3xScale(link.target.x)}'   y2='{d3yScale(link.target.y)}' 
-            stroke-width='{Math.sqrt(link.value)}'>
+            x2='{d3xScale(link.target.x)}'   y2='{d3yScale(link.target.y)}'
+            transform='translate(0 {height}) scale(1 -1)'>
             <title>{link.source.id}</title>
       </line>
     </g>
 	{/each}
 
 	{#each nodes as point}
-    <circle class='node' fill='{colourScale(point.group)}' cx='{d3xScale(point.x)}' cy='{d3yScale(point.y)}'>
+    <circle class='node' r='5' fill='{colourScale(point.group)}' cx='{d3xScale(point.x)}' cy='{d3yScale(point.y)}'
+     transform='translate(0 {height}) scale(1 -1)'>
     <title>{point.id}</title></circle>
 	{/each}
 
@@ -190,7 +165,6 @@
 	circle {
 		stroke: #fff;
     stroke-width: 1.5;
-    r: 5px;
 	}
 
 	.tick line {
