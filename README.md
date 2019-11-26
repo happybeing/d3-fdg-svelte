@@ -1,71 +1,39 @@
-*Psst — looking for a shareable component template? Go here --> [sveltejs/component-template](https://github.com/sveltejs/component-template)*
+# D3 Force Directed Graph in Svelte
 
----
+This is an implementation of the D3 Force Directed Graph example which you 
+can view [here](https://observablehq.com/@d3/force-directed-graph), 
+modified to work in Svelte.
 
-# svelte app
+I've added some axes but that's the only visual difference. There's also 
+a live [REPL](https://svelte.dev/repl/01a5774b53e9416584428c025668407b?version=3.15.0).
 
-This is a project template for [Svelte](https://svelte.dev) apps. It lives at https://github.com/sveltejs/template.
+The code in this repo is based on the default [sveltejs/template](https://github.com/sveltejs/template), so refer to that for more information. 
+Note though, I have modified it to use `yarn` rather than `npm`, so the 
+essential commands are given below.
 
-To create a new project based on this template using [degit](https://github.com/Rich-Harris/degit):
-
-```bash
-npx degit sveltejs/template svelte-app
-cd svelte-app
-```
-
-*Note that you will need to have [Node.js](https://nodejs.org) installed.*
-
+*Note that you will need to have [Node.js](https://nodejs.org) and `yarn` installed.*
 
 ## Get started
+
+Get the code...
+```bash
+git clone https://github.com/theWebalyst/d3-fdg-svelte
+```
 
 Install the dependencies...
 
 ```bash
-cd svelte-app
-npm install
+cd d3-fdg-svelte
+yarn
 ```
 
 ...then start [Rollup](https://rollupjs.org):
 
 ```bash
-npm run dev
+yarn dev
 ```
 
-Navigate to [localhost:5000](http://localhost:5000). You should see your app running. Edit a component file in `src`, save it, and reload the page to see your changes.
+Navigate to [localhost:5000](http://localhost:5000). You should see the app running.
 
-By default, the server will only respond to requests from localhost. To allow connections from other computers, edit the `sirv` commands in package.json to include the option `--host 0.0.0.0`.
-
-
-## Deploying to the web
-
-### With [now](https://zeit.co/now)
-
-Install `now` if you haven't already:
-
-```bash
-npm install -g now
-```
-
-Then, from within your project folder:
-
-```bash
-cd public
-now
-```
-
-As an alternative, use the [Now desktop client](https://zeit.co/download) and simply drag the unzipped project folder to the taskbar icon.
-
-### With [surge](https://surge.sh/)
-
-Install `surge` if you haven't already:
-
-```bash
-npm install -g surge
-```
-
-Then, from within your project folder:
-
-```bash
-npm run build
-surge public
-```
+## More information 
+For more information about the template used to create this app, see the README at https://github.com/sveltejs/template.
