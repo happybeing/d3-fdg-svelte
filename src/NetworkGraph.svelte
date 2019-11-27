@@ -1,15 +1,16 @@
 <script>
 	import { onMount } from 'svelte';
  
-import * as d3 from 'd3';
-import {event as currentEvent} from 'd3';  
-	import { scaleLinear, scaleOrdinal } from 'd3'// d3-scale';
-  import { schemeCategory10 } from 'd3'//'d3-scale-chromatic';
-  import { select, selectAll } from 'd3'// "d3-selection";
-	import { drag } from 'd3'// 'd3-drag';
-	import { forceSimulation, forceLink, forceManyBody, forceCenter } from 'd3'//'d3-force';
+//import * as d3 from 'd3';
+//import {event as currentEvent} from 'd3'; 
+  import { scaleLinear, scaleOrdinal } from 'd3-scale';
+  import { schemeCategory10 } from 'd3-scale-chromatic';
+  import { select, selectAll } from 'd3-selection';
+	import { drag } from 'd3-drag';
+	import { forceSimulation, forceLink, forceManyBody, forceCenter } from 'd3-force';
 
-//  let d3 = { scaleLinear, scaleOrdinal, schemeCategory10, select, selectAll, drag,  forceSimulation, forceLink, forceManyBody, forceCenter }
+  import {event as currentEvent} from 'd3-selection'  // Needed to get drag working, see: https://github.com/d3/d3/issues/2733
+	let d3 = { scaleLinear, scaleOrdinal, schemeCategory10, select, selectAll, drag,  forceSimulation, forceLink, forceManyBody, forceCenter }
 
 	export let graph;
 
