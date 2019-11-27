@@ -57,23 +57,20 @@
 
 	let simulation
   function dragstarted() {
-		const d = currentEvent.subject
     if (!currentEvent.active) simulation.alphaTarget(0.3).restart();
-    currentEvent.subject.fx = d.x;
-    currentEvent.subject.fy = d.y;
+    currentEvent.subject.fx = currentEvent.subject.x;
+    currentEvent.subject.fy = currentEvent.subject.y;
   }
   
   function dragged() {
-		const d = currentEvent.subject
-    d.fx = currentEvent.x;
-    d.fy = currentEvent.y;
+    currentEvent.subject.fx = currentEvent.x;
+    currentEvent.subject.fy = currentEvent.y;
   }
   
   function dragended() {
-		const d = currentEvent.subject
     if (!currentEvent.active) simulation.alphaTarget(0);
-    d.fx = null;
-    d.fy = null;
+    currentEvent.subject.fx = null;
+    currentEvent.subject.fy = null;
   }
 
 	function dragsubject() {
