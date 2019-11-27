@@ -123,8 +123,8 @@
   
 	{#each links as link}
     <g stroke='#999' stroke-opacity='0.6'>
-      <line x1='{d3xScale(link.source.x)}' y1='{d3yScale(link.source.y)}' 
-            x2='{d3xScale(link.target.x)}'   y2='{d3yScale(link.target.y)}'
+      <line x1='{link.source.x}' y1='{d3yScale(link.source.y)}' 
+            x2='{link.target.x}' y2='{d3yScale(link.target.y)}'
             transform='translate(0 {height}) scale(1 -1)'>
             <title>{link.source.id}</title>
       </line>
@@ -132,7 +132,7 @@
 	{/each}
 
 	{#each nodes as point}
-    <circle class='node' r='5' fill='{colourScale(point.group)}' cx='{d3xScale(point.x)}' cy='{d3yScale(point.y)}'
+    <circle class='node' r='5' fill='{colourScale(point.group)}' cx='{point.x}' cy='{d3yScale(point.y)}'
      transform='translate(0 {height}) scale(1 -1)'>
     <title>{point.id}</title></circle>
 	{/each}
