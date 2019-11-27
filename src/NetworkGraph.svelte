@@ -1,8 +1,6 @@
 <script>
 	import { onMount } from 'svelte';
  
-//import * as d3 from 'd3';
-//import {event as currentEvent} from 'd3'; 
   import { scaleLinear, scaleOrdinal } from 'd3-scale';
   import { schemeCategory10 } from 'd3-scale-chromatic';
   import { select, selectAll } from 'd3-selection';
@@ -57,12 +55,6 @@
     console.log('resize()', width, height)
   }
 
-function color()
-  {
-    const scale = scaleOrdinal(); // ??? schemeCategory10
-    return d => scale(d.group);
-  }
-
 	let simulation
   function dragstarted() {
 		const d = currentEvent.subject
@@ -77,8 +69,6 @@ function color()
     d.fy = currentEvent.y;
   }
   
-	var canvas = document.querySelector("canvas");
-	
   function dragended() {
 		const d = currentEvent.subject
     if (!currentEvent.active) simulation.alphaTarget(0);
@@ -90,10 +80,6 @@ function color()
     return simulation.find(currentEvent.x, currentEvent.y);
   }
     
-  function ticked() {
-    // console.log('ticked()')
-	}
-
   function network() {
     resize()
 
