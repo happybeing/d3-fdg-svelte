@@ -34,14 +34,9 @@
 		[0, 2, 4, 6, 8, 10, 12] :
 		[0, 4, 8, 12];
 
-
-	$: d3xScale = scaleLinear()
-		.domain([padding.left, width - padding.right])
-		.range([padding.left, width - padding.right]);
-
 	$: d3yScale = scaleLinear()
 		.domain([0, height])
-		.range([height - padding.bottom, padding.top]);
+		.range([height, 0]);
 
 	$: links = graph.links.map(d => Object.create(d));
   $: nodes = graph.nodes.map(d => Object.create(d));  
