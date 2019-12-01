@@ -16,8 +16,5 @@
 </style>
 
 <div class="chart">
-	<h2>d3 Force Directed Graph - canvas</h2>
-
-	<!-- <NetworkGraph graph={data}/> -->
 	<NetworkGraphCanvas graph={data}/>
 </div>

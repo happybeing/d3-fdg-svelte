@@ -1,3 +1,11 @@
+<h2>d3 Force Directed Graph - canvas with idContext</h2>
+
+Note that on mobiles and tablets touch drag does not work because the
+hit detection method doesn't work well with small touch screens.
+
+This can be fixed/improved by using other hit detection 
+methods, see <code>getNodeFromMouseEvent()</code>.
+
 <script>
     import { onMount } from 'svelte';
  
@@ -62,15 +70,16 @@
             });
 
         // title
-        d3.select(context.canvas).on("mousemove", () => {
-
+        d3.select(context.canvas).on("mousemove", tooltip);
+        function tooltip () {
+            console.log('tooltip: ', currentEvent);
             const d = getNodeFromMouseEvent(currentEvent);
             if (d) {
             context.canvas.title = d.id;
             } else {
             context.canvas.title = "";
             }
-        });
+        };
   
         d3.select(context.canvas)
             .call(
@@ -115,6 +124,10 @@
 
     });
 
+    // This method of hit detection is poor on small devices because fat fingers
+    // can't hit small targets. Alternatives:
+    //  - add a hit radius to this (larger for small touch screens)
+    //  - use simulation.find() with a hit radius (larger for small touch screens)
     function getNodeFromMouseEvent(event) {
         let mouse = getMousePos(canvas, event);
         const color = idContext.getImageData(mouse.x, mouse.y, 1, 1).data;
