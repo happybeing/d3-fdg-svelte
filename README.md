@@ -17,18 +17,18 @@ view the code and a live example using the 'REPL' links below.
     `*` In (1) only, I've added some axes but that's the only visual difference.
 
 ### Performance
-I'm planning to add the ability do create much larger networks in order to do some
+I'm planning to add the ability to create much larger networks in order to do some
 performance tests with tens to hundreds of thousands of nodes. It will be interesting 
 to see how the alternative hit detection methods of (2) and (3) compare. The former uses
-D3 `simulation.find()` while 3 uses a second `idContext` (drawing all the nodes a second
-time and checking using the colour of any hit to determine which node was hit).
+D3 `simulation.find()` while (3) uses a second `idContext` (drawing all the nodes a second
+time and using the colour of any hit to determine which node was hit).
 
 ### Touch Screens
 All should work with laptop, mobile and tablet touch screens (tested with Chrome and Firefox on Ubuntu and Android) but
 note:
 > It can be hard to hit the nodes with a fat finger on a small screen, so if you
-> want to support mobile devices, you may have to enlarge the hit radius when the display
-> small screen.
+> want to test or support mobile devices, you may have to enlarge the hit radius 
+> when the display small screen.
 
 ## Get started
 The conversions are based on the default [sveltejs/template](https://github.com/sveltejs/template), so refer to that for more information. 
