@@ -1,50 +1,50 @@
+<h2>d3 Force Directed Graph - canvas with d3 hitdetection</h2>
 <script>
     import { onMount } from 'svelte';
- 
+
     import { scaleLinear, scaleOrdinal } from 'd3-scale';
     import { schemeCategory10 } from 'd3-scale-chromatic';
     import { select, selectAll } from 'd3-selection';
-	import { drag } from 'd3-drag';
-	import { forceSimulation, forceLink, forceManyBody, forceCenter } from 'd3-force';
+    import { drag } from 'd3-drag';
+    import { forceSimulation, forceLink, forceManyBody, forceCenter } from 'd3-force';
 
     import {event as currentEvent} from 'd3-selection'  // Needed to get drag working, see: https://github.com/d3/d3/issues/2733
-	let d3 = { scaleLinear, scaleOrdinal, schemeCategory10, select, selectAll, drag,  forceSimulation, forceLink, forceManyBody, forceCenter }
+    let d3 = { scaleLinear, scaleOrdinal, schemeCategory10, select, selectAll, drag,  forceSimulation, forceLink, forceManyBody, forceCenter }
 
-	export let graph;
+    export let graph;
 
-    let svg;
-    let canvas, idCanvas;
-	let width = 500;
+    let canvas;
+    let width = 500;
     let height = 600;
     const nodeRadius = 5;
 
-	const padding = { top: 20, right: 40, bottom: 40, left: 25 };
+    const padding = { top: 20, right: 40, bottom: 40, left: 25 };
 
-	$: xScale = scaleLinear()
-		.domain([0, 20])
-		.range([padding.left, width - padding.right]);
+    $: xScale = scaleLinear()
+        .domain([0, 20])
+        .range([padding.left, width - padding.right]);
 
-	$: yScale = scaleLinear()
-		.domain([0, 12])
-		.range([height - padding.bottom, padding.top]);
+    $: yScale = scaleLinear()
+        .domain([0, 12])
+        .range([height - padding.bottom, padding.top]);
 
-	$: xTicks = width > 180 ?
-		[0, 4, 8, 12, 16, 20] :
-		[0, 10, 20];
+    $: xTicks = width > 180 ?
+        [0, 4, 8, 12, 16, 20] :
+        [0, 10, 20];
 
-	$: yTicks = height > 180 ?
-		[0, 2, 4, 6, 8, 10, 12] :
-		[0, 4, 8, 12];
+    $: yTicks = height > 180 ?
+        [0, 2, 4, 6, 8, 10, 12] :
+        [0, 4, 8, 12];
 
-	$: d3yScale = scaleLinear()
-		.domain([0, height])
-		.range([height, 0]);
+    $: d3yScale = scaleLinear()
+        .domain([0, height])
+        .range([height, 0]);
 
-	$: links = graph.links.map(d => Object.create(d));
+    $: links = graph.links.map(d => Object.create(d));
     $: nodes = graph.nodes.map(d => Object.create(d));  
-	
-	const groupColour = d3.scaleOrdinal(d3.schemeCategory10);
-    
+
+    const groupColour = d3.scaleOrdinal(d3.schemeCategory10);
+
     let simulation, context
     onMount(() => {
         context = canvas.getContext('2d');
@@ -81,19 +81,17 @@
 
 
         // title
-        d3.select(context.canvas).on("mousemove", () => {
-            const d = simulation.container(canvas)
-                        .find(currentEvent.x, currentEvent.y, nodeRadius);
+        d3.select(context.canvas)
+            .on("mousemove", () => {
+            const d = simulation.find(currentEvent.offsetX, currentEvent.offsetY, nodeRadius);
             
             if (d) {
-                console.log(currentEvent.x, currentEvent.y, 'title: ', d.id);
-                context.canvas.title = d.id;
+                if (context.canvas.title !== d.id) context.canvas.title = d.id;
             } else {
-                console.log('cleared')
-                context.canvas.title = "";
+                if (delete context.canvas.title !== undefined) delete context.canvas.title;
             }
         });
-  
+
         d3.select(canvas)
         .call(d3.drag()
             .container(canvas)
@@ -105,7 +103,7 @@
 
     // Use the d3-force simulation to locate the node
     function dragsubject() {
-        return simulation.find(currentEvent.x, currentEvent.y, nodeRadius*3);
+        return simulation.find(currentEvent.x, currentEvent.y, nodeRadius);
     }
 
     function resize() {
@@ -128,31 +126,30 @@
         currentEvent.subject.fx = currentEvent.subject.x;
         currentEvent.subject.fy = currentEvent.subject.y;
     }
-    
+
     function dragged() {
         currentEvent.subject.fx = currentEvent.x;
         currentEvent.subject.fy = currentEvent.y;
     }
-    
+
     function dragended() {
         if (!currentEvent.active) simulation.alphaTarget(0);
         currentEvent.subject.fx = null;
         currentEvent.subject.fy = null;
     }
-    
+
 </script>
 
 <svelte:window on:resize='{resize}'/>
 
 <div class='container'>
     <canvas bind:this={canvas} width='600' height='500'/>
-    <canvas bind:this={idCanvas} width='600' height='500' hidden='true'/>
 </div>
 
-<style>
-	canvas {
-		/* width: 80%; */
-		/* height: 80%; */
-		float: left;
-	}
+    <style>
+    canvas {
+        /* width: 80%; */
+        /* height: 80%; */
+        float: left;
+    }
 </style>
