@@ -15,7 +15,8 @@
     let svg;
     let canvas, idCanvas;
 	let width = 500;
-	let height = 600;
+    let height = 600;
+    const nodeRadius = 5;
 
 	const padding = { top: 20, right: 40, bottom: 40, left: 25 };
 
@@ -44,48 +45,18 @@
 	
 	const groupColour = d3.scaleOrdinal(d3.schemeCategory10);
     
-    let simulation, context, idContext
+    let simulation, context
     onMount(() => {
         context = canvas.getContext('2d');
-        idContext = idCanvas.getContext('2d');
         resize()
         
         simulation = d3.forceSimulation(nodes)
             .force("link", d3.forceLink(links).id(d => d.id))
             .force("charge", d3.forceManyBody())
             .force("center", d3.forceCenter(width / 2, height / 2))
-            .on('tick', function ticked() {
-                simulation.tick()   //???
-                // context.clearRect(0, 0, width, height);
-                nodes = [...nodes]
-                links = [...links]
-            });
-
-        // title
-        d3.select(context.canvas).on("mousemove", () => {
-
-            const d = getNodeFromMouseEvent(currentEvent);
-            if (d) {
-            context.canvas.title = d.id;
-            } else {
-            context.canvas.title = "";
-            }
-        });
-  
-        d3.select(context.canvas)
-            .call(
-            dragFunction(simulation)
-                .container(context.canvas)
-                .subject(() => {
-                const d = getNodeFromMouseEvent(currentEvent.sourceEvent);
-                return d || { x: currentEvent.x, y: currentEvent.y };
-                })
-            );
-  
-        simulation.on("tick", () => {
+            .on("tick", () => {
             context.clearRect(0, 0, context.canvas.width, context.canvas.height);
-            idContext.clearRect(0, 0, idContext.canvas.width, idContext.canvas.height);
-            
+            //
             links.forEach(d => {
                 context.beginPath();
                 context.moveTo(d.source.x, d.source.y);
@@ -99,36 +70,42 @@
             
             nodes.forEach((d, i) => {
                 context.beginPath();
-                context.arc(d.x, d.y, 5, 0, 2*Math.PI);
+                context.arc(d.x, d.y, nodeRadius, 0, 2*Math.PI);
                 context.strokeStyle = "#fff";
                 context.lineWidth = 1.5;
                 context.stroke();
                 context.fillStyle = groupColour(d.group);
                 context.fill();
-                
-                idContext.beginPath();
-                idContext.arc(d.x, d.y, 5, 0, 2*Math.PI);
-                idContext.fillStyle = indexToColor(i);
-                idContext.fill();
             });
         });
 
+
+        // title
+        d3.select(context.canvas).on("mousemove", () => {
+            const d = simulation.container(canvas)
+                        .find(currentEvent.x, currentEvent.y, nodeRadius);
+            
+            if (d) {
+                console.log(currentEvent.x, currentEvent.y, 'title: ', d.id);
+                context.canvas.title = d.id;
+            } else {
+                console.log('cleared')
+                context.canvas.title = "";
+            }
+        });
+  
+        d3.select(canvas)
+        .call(d3.drag()
+            .container(canvas)
+            .subject(dragsubject)
+            .on("start", dragstarted)
+            .on("drag", dragged)
+            .on("end", dragended));
     });
 
-    function getNodeFromMouseEvent(event) {
-        let mouse = getMousePos(canvas, event);
-        const color = idContext.getImageData(mouse.x, mouse.y, 1, 1).data;
-        const index = colorToIndex(color);
-        const node = nodes[index];
-        return node;
-    };
-    
-    function getMousePos(canvas, event) {
-        var rect = canvas.getBoundingClientRect();
-        return {
-            x: event.clientX - rect.left,
-            y: event.clientY - rect.top
-        };
+    // Use the d3-force simulation to locate the node
+    function dragsubject() {
+        return simulation.find(currentEvent.x, currentEvent.y, nodeRadius*3);
     }
 
     function resize() {
@@ -146,31 +123,23 @@
         return index;
     }
 
-    function dragFunction(simulation) {
-    
-        function dragstarted() {
-            if (!currentEvent.active) simulation.alphaTarget(0.3).restart();
-            currentEvent.subject.fx = currentEvent.subject.x;
-            currentEvent.subject.fy = currentEvent.subject.y;
-        }
-        
-        function dragged() {
-            currentEvent.subject.fx = currentEvent.x;
-            currentEvent.subject.fy = currentEvent.y;
-        }
-        
-        function dragended() {
-            if (!currentEvent.active) simulation.alphaTarget(0);
-            currentEvent.subject.fx = null;
-            currentEvent.subject.fy = null;
-        }
-        
-        return d3.drag()
-            .on("start", dragstarted)
-            .on("drag", dragged)
-            .on("end", dragended);
+    function dragstarted() {
+        if (!currentEvent.active) simulation.alphaTarget(0.3).restart();
+        currentEvent.subject.fx = currentEvent.subject.x;
+        currentEvent.subject.fy = currentEvent.subject.y;
     }
-
+    
+    function dragged() {
+        currentEvent.subject.fx = currentEvent.x;
+        currentEvent.subject.fy = currentEvent.y;
+    }
+    
+    function dragended() {
+        if (!currentEvent.active) simulation.alphaTarget(0);
+        currentEvent.subject.fx = null;
+        currentEvent.subject.fy = null;
+    }
+    
 </script>
 
 <svelte:window on:resize='{resize}'/>
