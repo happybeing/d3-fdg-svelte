@@ -1,4 +1,11 @@
-<h2>d3 Force Directed Graph - canvas with d3 hitdetection</h2>
+<h2>d3 Force Directed Graph - canvas with idContext</h2>
+
+Note that on mobiles and tablets touch drag does not work because the
+hit detection method doesn't work well with small touch screens.
+
+This can be fixed/improved by using other hit detection 
+methods, see <code>getNodeFromMouseEvent()</code>.
+
 <script>
     import { onMount } from 'svelte';
 
@@ -54,7 +61,36 @@
             .force("link", d3.forceLink(links).id(d => d.id))
             .force("charge", d3.forceManyBody())
             .force("center", d3.forceCenter(width / 2, height / 2))
-            .on("tick", () => {
+            .on('tick', function ticked() {
+                simulation.tick()   //???
+                // context.clearRect(0, 0, width, height);
+                nodes = [...nodes]
+                links = [...links]
+            });
+
+        // title
+        d3.select(context.canvas).on("mousemove", tooltip);
+        function tooltip () {
+            console.log('tooltip: ', currentEvent);
+            const d = getNodeFromMouseEvent(currentEvent);
+            if (d) {
+            context.canvas.title = d.id;
+            } else {
+            context.canvas.title = "";
+            }
+        };
+  
+        d3.select(context.canvas)
+            .call(
+            dragFunction(simulation)
+                .container(context.canvas)
+                .subject(() => {
+                const d = getNodeFromMouseEvent(currentEvent.sourceEvent);
+                return d || { x: currentEvent.x, y: currentEvent.y };
+                })
+            );
+  
+        simulation.on("tick", () => {
             context.clearRect(0, 0, context.canvas.width, context.canvas.height);
             //
             links.forEach(d => {
@@ -101,9 +137,24 @@
             .on("end", dragended));
     });
 
-    // Use the d3-force simulation to locate the node
-    function dragsubject() {
-        return simulation.find(currentEvent.x, currentEvent.y, nodeRadius);
+    // This method of hit detection is poor on small devices because fat fingers
+    // can't hit small targets. Alternatives:
+    //  - add a hit radius to this (larger for small touch screens)
+    //  - use simulation.find() with a hit radius (larger for small touch screens)
+    function getNodeFromMouseEvent(event) {
+        let mouse = getMousePos(canvas, event);
+        const color = idContext.getImageData(mouse.x, mouse.y, 1, 1).data;
+        const index = colorToIndex(color);
+        const node = nodes[index];
+        return node;
+    };
+    
+    function getMousePos(canvas, event) {
+        var rect = canvas.getBoundingClientRect();
+        return {
+            x: event.clientX - rect.left,
+            y: event.clientY - rect.top
+        };
     }
 
     function resize() {
