@@ -1,5 +1,5 @@
 <script>
-	import NetworkGraph from './NetworkGraph.svelte';
+	import NetworkGraphCanvas from './NetworkGraphCanvas.svelte';
 	import data from './data.js';
 </script>
 
@@ -15,11 +15,5 @@
 </style>
 
 <div class="chart">
-	<h2>SvelteJS Demo of d3 Force</h2>
-
-	<NetworkGraph graph={data}/>
-	<!-- <Scatterplot points={data.a}/>
-	<Scatterplot points={data.b}/>
-	<Scatterplot points={data.c}/>
-	<Scatterplot points={data.d}/> -->
+	<NetworkGraphCanvas graph={data}/>
 </div>
