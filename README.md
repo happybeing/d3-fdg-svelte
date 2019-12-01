@@ -1,19 +1,41 @@
 # D3 Force Directed Graph in Svelte
 
-This is an implementation of the D3 Force Directed Graph example which you 
-can view [here](https://observablehq.com/@d3/force-directed-graph), 
-modified to work in Svelte.
+This project contains Svelte JS versions of the [D3 Force Directed Graph example](https://observablehq.com/@d3/force-directed-graph).
 
-I've added some axes but that's the only visual difference. There's also 
-a live [REPL](https://svelte.dev/repl/01a5774b53e9416584428c025668407b?version=3.15.0).
+Each Svelte version is implemented as a file/component which can be tested
+by modifying `src/App.svelte` to select the one you wish to try. Or you can
+view the code and a live using th 'REPL' links below.
 
-The code in this repo is based on the default [sveltejs/template](https://github.com/sveltejs/template), so refer to that for more information. 
+
+
+## Svelte Implementations
+
+1. **NetworkGraph.svelte** - uses `SVG` elements ([REPL](https://svelte.dev/repl/01a5774b53e9416584428c025668407b?version=3.15.0))`*`
+2. **NetworkGraphCanvas.svelte** - uses `canvas` with D3 hit detection ([REPL](https://svelte.dev/repl/498b9556c3254c56a2f6c7cfc206bfb1?version=3.16.0))
+3. **NetworkGraphCanvasIdContext.svelte** - uses `canvas` with a second context for hit detection ([REPL](https://svelte.dev/repl/2b1b461355204525989af7b9b191ef49?version=3.16.0))
+
+    `*` In (1) only, I've added some axes but that's the only visual difference.
+
+### Performance
+I'm planning to add the ability do create much larger networks in order to do some
+performance tests with tens to hundreds of thousands of nodes. It will be interesting 
+to see how the alternative hit detection methods of (2) and (3) compare. The former uses
+D3 `simulation.find()` while 3 uses a second `idContext` (drawing all the nodes a second
+time and checking using the colour of any hit to determine which node was hit).
+
+### Touch Screens
+All should work with laptop, mobile and tablet touch screens (tested with Chrome and Firefox on Ubuntu and Android) but
+note:
+> It can be hard to hit the nodes with a fat finger on a small screen, so if you
+> want to support mobile devices, you may have to enlarge the hit radius when the display
+> small screen.
+
+## Get started
+The conversions are based on the default [sveltejs/template](https://github.com/sveltejs/template), so refer to that for more information. 
 Note though, I have modified it to use `yarn` rather than `npm`, so the 
 essential commands are given below.
 
-*Note that you will need to have [Node.js](https://nodejs.org) and `yarn` installed.*
-
-## Get started
+> *Note that you will need to have [Node.js](https://nodejs.org) and `yarn` installed.*
 
 Get the code...
 ```bash
