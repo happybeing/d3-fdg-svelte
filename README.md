@@ -4,7 +4,7 @@ This project contains Svelte JS versions of the [D3 Force Directed Graph example
 
 Each Svelte version is implemented as a file/component which can be tested
 by modifying `src/App.svelte` to select the one you wish to try. Or you can
-view the code and a live using th 'REPL' links below.
+view the code and a live example using the 'REPL' links below.
 
 
 
