@@ -1,5 +1,4 @@
 <script>
-	import NetworkGraph from './NetworkGraph.svelte';
 	import NetworkGraphCanvas from './NetworkGraphCanvas.svelte';
 	import data from './data.js';
 </script>
