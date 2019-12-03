@@ -66,9 +66,9 @@ methods, see <code>getNodeFromMouseEvent()</code>.
         function tooltip () {
             const d = getNodeFromMouseEvent(currentEvent);
             if (d) {
-            context.canvas.title = d.id;
+                if (context.canvas.title !== d.id) context.canvas.title = d.id;
             } else {
-            context.canvas.title = "";
+                if (delete context.canvas.title !== undefined) delete context.canvas.title;
             }
         };
   
