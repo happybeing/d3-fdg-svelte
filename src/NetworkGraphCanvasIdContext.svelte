@@ -1,4 +1,4 @@
-<h2>d3 Force Directed Graph - canvas with idContext</h2>
+<h2>d3 Force Directed Graph in Svelte js - canvas with idContext</h2>
 
 Note that on mobiles and tablets touch drag does not work because the
 hit detection method doesn't work well with small touch screens.
@@ -64,7 +64,6 @@ methods, see <code>getNodeFromMouseEvent()</code>.
         // title
         d3.select(context.canvas).on("mousemove", tooltip);
         function tooltip () {
-            console.log('tooltip: ', currentEvent);
             const d = getNodeFromMouseEvent(currentEvent);
             if (d) {
             context.canvas.title = d.id;
@@ -72,16 +71,6 @@ methods, see <code>getNodeFromMouseEvent()</code>.
             context.canvas.title = "";
             }
         };
-  
-        d3.select(context.canvas)
-            .call(
-            dragFunction(simulation)
-                .container(context.canvas)
-                .subject(() => {
-                const d = getNodeFromMouseEvent(currentEvent.sourceEvent);
-                return d || { x: currentEvent.x, y: currentEvent.y };
-                })
-            );
   
         simulation.on("tick", () => {
             context.clearRect(0, 0, context.canvas.width, context.canvas.height);
@@ -114,8 +103,20 @@ methods, see <code>getNodeFromMouseEvent()</code>.
             });
         });
 
+        d3.select(canvas)
+        .call(d3.drag()
+            .container(canvas)
+            .subject(dragsubject)
+            .on("start", dragstarted)
+            .on("drag", dragged)
+            .on("end", dragended));
     });
 
+    function dragsubject() {
+        const d = getNodeFromMouseEvent(currentEvent.sourceEvent);
+        return d || { x: currentEvent.x, y: currentEvent.y };
+    }
+    
     // This method of hit detection is poor on small devices because fat fingers
     // can't hit small targets. Alternatives:
     //  - add a hit radius to this (larger for small touch screens)
@@ -151,29 +152,21 @@ methods, see <code>getNodeFromMouseEvent()</code>.
         return index;
     }
 
-    function dragFunction(simulation) {
+    function dragstarted() {
+        if (!currentEvent.active) simulation.alphaTarget(0.3).restart();
+        currentEvent.subject.fx = currentEvent.subject.x;
+        currentEvent.subject.fy = currentEvent.subject.y;
+    }
     
-        function dragstarted() {
-            if (!currentEvent.active) simulation.alphaTarget(0.3).restart();
-            currentEvent.subject.fx = currentEvent.subject.x;
-            currentEvent.subject.fy = currentEvent.subject.y;
-        }
-        
-        function dragged() {
-            currentEvent.subject.fx = currentEvent.x;
-            currentEvent.subject.fy = currentEvent.y;
-        }
-        
-        function dragended() {
-            if (!currentEvent.active) simulation.alphaTarget(0);
-            currentEvent.subject.fx = null;
-            currentEvent.subject.fy = null;
-        }
-        
-        return d3.drag()
-            .on("start", dragstarted)
-            .on("drag", dragged)
-            .on("end", dragended);
+    function dragged() {
+        currentEvent.subject.fx = currentEvent.x;
+        currentEvent.subject.fy = currentEvent.y;
+    }
+    
+    function dragended() {
+        if (!currentEvent.active) simulation.alphaTarget(0);
+        currentEvent.subject.fx = null;
+        currentEvent.subject.fy = null;
     }
 
 </script>
