@@ -8,42 +8,42 @@ methods, see <code>getNodeFromMouseEvent()</code>.
 
 <script>
     import { onMount } from 'svelte';
- 
+
     import { scaleLinear, scaleOrdinal } from 'd3-scale';
     import { schemeCategory10 } from 'd3-scale-chromatic';
     import { select, selectAll } from 'd3-selection';
-	import { drag } from 'd3-drag';
-	import { forceSimulation, forceLink, forceManyBody, forceCenter } from 'd3-force';
+    import { drag } from 'd3-drag';
+    import { forceSimulation, forceLink, forceManyBody, forceCenter } from 'd3-force';
 
     import {event as currentEvent} from 'd3-selection'  // Needed to get drag working, see: https://github.com/d3/d3/issues/2733
-	let d3 = { scaleLinear, scaleOrdinal, schemeCategory10, select, selectAll, drag,  forceSimulation, forceLink, forceManyBody, forceCenter }
+    let d3 = { scaleLinear, scaleOrdinal, schemeCategory10, select, selectAll, drag,  forceSimulation, forceLink, forceManyBody, forceCenter }
 
-	export let graph;
+    export let graph;
 
     let svg;
     let canvas, idCanvas;
-	let width = 500;
-	let height = 600;
+    let width = 500;
+    let height = 600;
 
-	const padding = { top: 20, right: 40, bottom: 40, left: 25 };
+    const padding = { top: 20, right: 40, bottom: 40, left: 25 };
 
-	$: xScale = scaleLinear()
-		.domain([0, 20])
-		.range([padding.left, width - padding.right]);
+    $: xScale = scaleLinear()
+        .domain([0, 20])
+        .range([padding.left, width - padding.right]);
 
-	$: yScale = scaleLinear()
-		.domain([0, 12])
-		.range([height - padding.bottom, padding.top]);
+    $: yScale = scaleLinear()
+        .domain([0, 12])
+        .range([height - padding.bottom, padding.top]);
 
-	$: d3yScale = scaleLinear()
-		.domain([0, height])
-		.range([height, 0]);
+    $: d3yScale = scaleLinear()
+        .domain([0, height])
+        .range([height, 0]);
 
-	$: links = graph.links.map(d => Object.create(d));
+    $: links = graph.links.map(d => Object.create(d));
     $: nodes = graph.nodes.map(d => Object.create(d));  
-	
-	const groupColour = d3.scaleOrdinal(d3.schemeCategory10);
-    
+
+    const groupColour = d3.scaleOrdinal(d3.schemeCategory10);
+
     let simulation, context, idContext
     onMount(() => {
         context = canvas.getContext('2d');
@@ -71,7 +71,7 @@ methods, see <code>getNodeFromMouseEvent()</code>.
                 if (delete context.canvas.title !== undefined) delete context.canvas.title;
             }
         };
-  
+
         simulation.on("tick", () => {
             context.clearRect(0, 0, context.canvas.width, context.canvas.height);
             idContext.clearRect(0, 0, idContext.canvas.width, idContext.canvas.height);
@@ -116,7 +116,7 @@ methods, see <code>getNodeFromMouseEvent()</code>.
         const d = getNodeFromMouseEvent(currentEvent.sourceEvent);
         return d || { x: currentEvent.x, y: currentEvent.y };
     }
-    
+
     // This method of hit detection is poor on small devices because fat fingers
     // can't hit small targets. Alternatives:
     //  - add a hit radius to this (larger for small touch screens)
@@ -128,7 +128,7 @@ methods, see <code>getNodeFromMouseEvent()</code>.
         const node = nodes[index];
         return node;
     };
-    
+
     function getMousePos(canvas, event) {
         var rect = canvas.getBoundingClientRect();
         return {
@@ -157,12 +157,12 @@ methods, see <code>getNodeFromMouseEvent()</code>.
         currentEvent.subject.fx = currentEvent.subject.x;
         currentEvent.subject.fy = currentEvent.subject.y;
     }
-    
+
     function dragged() {
         currentEvent.subject.fx = currentEvent.x;
         currentEvent.subject.fy = currentEvent.y;
     }
-    
+
     function dragended() {
         if (!currentEvent.active) simulation.alphaTarget(0);
         currentEvent.subject.fx = null;
