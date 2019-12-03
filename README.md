@@ -28,7 +28,7 @@ All should work with laptop, mobile and tablet touch screens (tested with Chrome
 note:
 > It can be hard to hit the nodes with a fat finger on a small screen, so if you
 > want to test or support mobile devices, you may have to enlarge the hit radius 
-> when the display small screen.
+> when the display is a small screen.
 
 ## Get started
 The conversions are based on the default [sveltejs/template](https://github.com/sveltejs/template), so refer to that for more information. 
