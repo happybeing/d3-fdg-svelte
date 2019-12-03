@@ -8,53 +8,46 @@ methods, see <code>getNodeFromMouseEvent()</code>.
 
 <script>
     import { onMount } from 'svelte';
-
+ 
     import { scaleLinear, scaleOrdinal } from 'd3-scale';
     import { schemeCategory10 } from 'd3-scale-chromatic';
     import { select, selectAll } from 'd3-selection';
-    import { drag } from 'd3-drag';
-    import { forceSimulation, forceLink, forceManyBody, forceCenter } from 'd3-force';
+	import { drag } from 'd3-drag';
+	import { forceSimulation, forceLink, forceManyBody, forceCenter } from 'd3-force';
 
     import {event as currentEvent} from 'd3-selection'  // Needed to get drag working, see: https://github.com/d3/d3/issues/2733
-    let d3 = { scaleLinear, scaleOrdinal, schemeCategory10, select, selectAll, drag,  forceSimulation, forceLink, forceManyBody, forceCenter }
+	let d3 = { scaleLinear, scaleOrdinal, schemeCategory10, select, selectAll, drag,  forceSimulation, forceLink, forceManyBody, forceCenter }
 
-    export let graph;
+	export let graph;
 
-    let canvas;
-    let width = 500;
-    let height = 600;
-    const nodeRadius = 5;
+    let svg;
+    let canvas, idCanvas;
+	let width = 500;
+	let height = 600;
 
-    const padding = { top: 20, right: 40, bottom: 40, left: 25 };
+	const padding = { top: 20, right: 40, bottom: 40, left: 25 };
 
-    $: xScale = scaleLinear()
-        .domain([0, 20])
-        .range([padding.left, width - padding.right]);
+	$: xScale = scaleLinear()
+		.domain([0, 20])
+		.range([padding.left, width - padding.right]);
 
-    $: yScale = scaleLinear()
-        .domain([0, 12])
-        .range([height - padding.bottom, padding.top]);
+	$: yScale = scaleLinear()
+		.domain([0, 12])
+		.range([height - padding.bottom, padding.top]);
 
-    $: xTicks = width > 180 ?
-        [0, 4, 8, 12, 16, 20] :
-        [0, 10, 20];
+	$: d3yScale = scaleLinear()
+		.domain([0, height])
+		.range([height, 0]);
 
-    $: yTicks = height > 180 ?
-        [0, 2, 4, 6, 8, 10, 12] :
-        [0, 4, 8, 12];
-
-    $: d3yScale = scaleLinear()
-        .domain([0, height])
-        .range([height, 0]);
-
-    $: links = graph.links.map(d => Object.create(d));
+	$: links = graph.links.map(d => Object.create(d));
     $: nodes = graph.nodes.map(d => Object.create(d));  
-
-    const groupColour = d3.scaleOrdinal(d3.schemeCategory10);
-
-    let simulation, context
+	
+	const groupColour = d3.scaleOrdinal(d3.schemeCategory10);
+    
+    let simulation, context, idContext
     onMount(() => {
         context = canvas.getContext('2d');
+        idContext = idCanvas.getContext('2d');
         resize()
         
         simulation = d3.forceSimulation(nodes)
@@ -92,7 +85,8 @@ methods, see <code>getNodeFromMouseEvent()</code>.
   
         simulation.on("tick", () => {
             context.clearRect(0, 0, context.canvas.width, context.canvas.height);
-            //
+            idContext.clearRect(0, 0, idContext.canvas.width, idContext.canvas.height);
+            
             links.forEach(d => {
                 context.beginPath();
                 context.moveTo(d.source.x, d.source.y);
@@ -106,35 +100,20 @@ methods, see <code>getNodeFromMouseEvent()</code>.
             
             nodes.forEach((d, i) => {
                 context.beginPath();
-                context.arc(d.x, d.y, nodeRadius, 0, 2*Math.PI);
+                context.arc(d.x, d.y, 5, 0, 2*Math.PI);
                 context.strokeStyle = "#fff";
                 context.lineWidth = 1.5;
                 context.stroke();
                 context.fillStyle = groupColour(d.group);
                 context.fill();
+                
+                idContext.beginPath();
+                idContext.arc(d.x, d.y, 5, 0, 2*Math.PI);
+                idContext.fillStyle = indexToColor(i);
+                idContext.fill();
             });
         });
 
-
-        // title
-        d3.select(context.canvas)
-            .on("mousemove", () => {
-            const d = simulation.find(currentEvent.offsetX, currentEvent.offsetY, nodeRadius);
-            
-            if (d) {
-                if (context.canvas.title !== d.id) context.canvas.title = d.id;
-            } else {
-                if (delete context.canvas.title !== undefined) delete context.canvas.title;
-            }
-        });
-
-        d3.select(canvas)
-        .call(d3.drag()
-            .container(canvas)
-            .subject(dragsubject)
-            .on("start", dragstarted)
-            .on("drag", dragged)
-            .on("end", dragended));
     });
 
     // This method of hit detection is poor on small devices because fat fingers
@@ -172,21 +151,29 @@ methods, see <code>getNodeFromMouseEvent()</code>.
         return index;
     }
 
-    function dragstarted() {
-        if (!currentEvent.active) simulation.alphaTarget(0.3).restart();
-        currentEvent.subject.fx = currentEvent.subject.x;
-        currentEvent.subject.fy = currentEvent.subject.y;
-    }
-
-    function dragged() {
-        currentEvent.subject.fx = currentEvent.x;
-        currentEvent.subject.fy = currentEvent.y;
-    }
-
-    function dragended() {
-        if (!currentEvent.active) simulation.alphaTarget(0);
-        currentEvent.subject.fx = null;
-        currentEvent.subject.fy = null;
+    function dragFunction(simulation) {
+    
+        function dragstarted() {
+            if (!currentEvent.active) simulation.alphaTarget(0.3).restart();
+            currentEvent.subject.fx = currentEvent.subject.x;
+            currentEvent.subject.fy = currentEvent.subject.y;
+        }
+        
+        function dragged() {
+            currentEvent.subject.fx = currentEvent.x;
+            currentEvent.subject.fy = currentEvent.y;
+        }
+        
+        function dragended() {
+            if (!currentEvent.active) simulation.alphaTarget(0);
+            currentEvent.subject.fx = null;
+            currentEvent.subject.fy = null;
+        }
+        
+        return d3.drag()
+            .on("start", dragstarted)
+            .on("drag", dragged)
+            .on("end", dragended);
     }
 
 </script>
@@ -195,12 +182,13 @@ methods, see <code>getNodeFromMouseEvent()</code>.
 
 <div class='container'>
     <canvas bind:this={canvas} width='600' height='500'/>
+    <canvas bind:this={idCanvas} width='600' height='500' hidden='true'/>
 </div>
 
-    <style>
-    canvas {
-        /* width: 80%; */
-        /* height: 80%; */
-        float: left;
-    }
+<style>
+	canvas {
+		/* width: 80%; */
+		/* height: 80%; */
+		float: left;
+	}
 </style>
