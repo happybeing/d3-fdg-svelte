@@ -10,9 +10,9 @@ view the code and a live example using the 'REPL' links below.
 
 ## Svelte Implementations
 
-1. **NetworkGraph.svelte** - uses `SVG` elements ([REPL](https://svelte.dev/repl/01a5774b53e9416584428c025668407b?version=3.15.0))`*`
-2. **NetworkGraphCanvas.svelte** - uses `canvas` with D3 hit detection ([REPL](https://svelte.dev/repl/498b9556c3254c56a2f6c7cfc206bfb1?version=3.16.0))
-3. **NetworkGraphCanvasIdContext.svelte** - uses `canvas` with a second context for hit detection ([REPL](https://svelte.dev/repl/2b1b461355204525989af7b9b191ef49?version=3.16.0))
+1. **NetworkGraph.svelte** - uses `SVG` elements ([REPL](https://svelte.dev/repl/b74876c524734666ba44cb3fa5b48e90) or [REPL](https://svelte.dev/repl/01a5774b53e9416584428c025668407b?version=3.15.0) without d3-zoom)`*`
+2. **NetworkGraphCanvas.svelte** - uses `canvas` with D3 hit detection ([REPL](https://svelte.dev/repl/8b5800c9552440fbb51848504a3c46c9) or [REPL](https://svelte.dev/repl/498b9556c3254c56a2f6c7cfc206bfb1?version=3.16.0) without d3-zoom)
+3. **NetworkGraphCanvasIdContext.svelte** - uses `canvas` with a second context for hit detection ([REPL](https://svelte.dev/repl/5cc46975e2c94f4d877d81b6dfbaa142) or [REPL](https://svelte.dev/repl/2b1b461355204525989af7b9b191ef49?version=3.16.0) without d3-zoom)
 
     `*` In (1) only, I've added some axes but that's the only visual difference.
 
