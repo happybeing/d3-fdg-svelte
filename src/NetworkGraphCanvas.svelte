@@ -157,7 +157,7 @@ increase hit radius to hit a node with a 'fat finger'!</p>
 <svelte:window on:resize='{resize}'/>
 
 <div class='container'>
-    <canvas bind:this={canvas} width='600' height='500'/>
+    <canvas bind:this={canvas} width='{width}' height='{height}'/>
 </div>
 
     <style>

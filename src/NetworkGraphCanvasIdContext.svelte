@@ -184,8 +184,8 @@ function dragsubject() {
 <svelte:window on:resize='{resize}'/>
 
 <div class='container'>
-    <canvas bind:this={canvas} width='600' height='500'/>
-    <canvas bind:this={idCanvas} width='600' height='500' hidden='true'/>
+    <canvas bind:this={canvas} width='{width}' height='{height}'/>
+    <canvas bind:this={idCanvas} width='{width}' height='{height}' hidden='true'/>
 </div>
 
 <style>
