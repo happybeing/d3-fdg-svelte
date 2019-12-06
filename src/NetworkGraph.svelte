@@ -140,21 +140,4 @@ increase hit radius to hit a node with a 'fat finger'!</p>
     stroke-width: 1.5;
 	}
 
-	.tick line {
-		stroke: #ddd;
-		stroke-dasharray: 2;
-	}
-
-	text {
-		font-size: 12px;
-		fill: #999;
-	}
-
-	.x-axis text {
-		text-anchor: middle;
-	}
-
-	.y-axis text {
-		text-anchor: end;
-	}
 </style>
