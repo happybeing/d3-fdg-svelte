@@ -1,22 +1,23 @@
-<h2>d3 Force Directed Graph in Svelte js - canvas with idContext</h2>
-
-Note that on mobiles and tablets touch drag does not work because the
-hit detection method doesn't work well with small touch screens.
-
-This can be fixed/improved by using other hit detection 
-methods, see <code>getNodeFromMouseEvent()</code>.
+<h2>d3 Force Directed Graph in Svelte js - 2 x canvas</h2>
+<p>Uses HTML5 <code>&lt;canvas&gt;</code>, one for the 
+display an one for hit detection using node colours based 
+on node index.</p>
+<p>Features: hover, drag nodes, zoom and pan with mouse
+or touch screen. Note: on small touch screens you may need to 
+increase hit radius to hit a node with a 'fat finger'!</p>
 
 <script>
     import { onMount } from 'svelte';
 
     import { scaleLinear, scaleOrdinal } from 'd3-scale';
+    import { zoom, zoomIdentity } from 'd3-zoom';
     import { schemeCategory10 } from 'd3-scale-chromatic';
-    import { select, selectAll } from 'd3-selection';
+    import { select, selectAll, mouse } from 'd3-selection';
     import { drag } from 'd3-drag';
     import { forceSimulation, forceLink, forceManyBody, forceCenter } from 'd3-force';
 
     import {event as currentEvent} from 'd3-selection'  // Needed to get drag working, see: https://github.com/d3/d3/issues/2733
-    let d3 = { scaleLinear, scaleOrdinal, schemeCategory10, select, selectAll, drag,  forceSimulation, forceLink, forceManyBody, forceCenter }
+    let d3 = { zoom, zoomIdentity, scaleLinear, scaleOrdinal, schemeCategory10, select, selectAll, mouse, drag,  forceSimulation, forceLink, forceManyBody, forceCenter }
 
     export let graph;
 
@@ -44,6 +45,7 @@ methods, see <code>getNodeFromMouseEvent()</code>.
 
     const groupColour = d3.scaleOrdinal(d3.schemeCategory10);
 
+    let transform = d3.zoomIdentity;
     let simulation, context, idContext
     onMount(() => {
         context = canvas.getContext('2d');
@@ -54,54 +56,17 @@ methods, see <code>getNodeFromMouseEvent()</code>.
             .force("link", d3.forceLink(links).id(d => d.id))
             .force("charge", d3.forceManyBody())
             .force("center", d3.forceCenter(width / 2, height / 2))
-            .on('tick', function ticked() {
-                simulation.tick()   //???
-                // context.clearRect(0, 0, width, height);
-                nodes = [...nodes]
-                links = [...links]
-            });
+           .on("tick", simulationUpdate);
 
         // title
         d3.select(context.canvas).on("mousemove", tooltip);
         function tooltip () {
-            const d = getNodeFromMouseEvent(currentEvent);
-            if (d) {
-                if (context.canvas.title !== d.id) context.canvas.title = d.id;
-            } else {
-                if (delete context.canvas.title !== undefined) delete context.canvas.title;
-            }
+            const d = getNodeFromMouseEvent();
+            if (d)
+                context.canvas.title = d.id;
+            else
+                context.canvas.title = '';
         };
-
-        simulation.on("tick", () => {
-            context.clearRect(0, 0, context.canvas.width, context.canvas.height);
-            idContext.clearRect(0, 0, idContext.canvas.width, idContext.canvas.height);
-            
-            links.forEach(d => {
-                context.beginPath();
-                context.moveTo(d.source.x, d.source.y);
-                context.lineTo(d.target.x, d.target.y);
-                context.globalAlpha = 0.6;
-                context.strokeStyle = "#999";
-                context.lineWidth = Math.sqrt(d.value);
-                context.stroke();
-                context.globalAlpha = 1;
-            });
-            
-            nodes.forEach((d, i) => {
-                context.beginPath();
-                context.arc(d.x, d.y, 5, 0, 2*Math.PI);
-                context.strokeStyle = "#fff";
-                context.lineWidth = 1.5;
-                context.stroke();
-                context.fillStyle = groupColour(d.group);
-                context.fill();
-                
-                idContext.beginPath();
-                idContext.arc(d.x, d.y, 5, 0, 2*Math.PI);
-                idContext.fillStyle = indexToColor(i);
-                idContext.fill();
-            });
-        });
 
         d3.select(canvas)
         .call(d3.drag()
@@ -109,64 +74,109 @@ methods, see <code>getNodeFromMouseEvent()</code>.
             .subject(dragsubject)
             .on("start", dragstarted)
             .on("drag", dragged)
-            .on("end", dragended));
+            .on("end", dragended))
+        .call(d3.zoom()
+          .scaleExtent([1 / 10, 8])
+          .on('zoom', zoomed));    
     });
 
-    function dragsubject() {
-        const d = getNodeFromMouseEvent(currentEvent.sourceEvent);
-        return d || { x: currentEvent.x, y: currentEvent.y };
+    function simulationUpdate() {
+        nodes = [...nodes]
+        links = [...links]
+        context.save();
+        context.clearRect(0, 0, context.canvas.width, context.canvas.height);
+        context.translate(transform.x, transform.y);
+        context.scale(transform.k, transform.k);
+
+        idContext.save();
+        idContext.clearRect(0, 0, idContext.canvas.width, idContext.canvas.height);
+        idContext.translate(transform.x, transform.y);
+        idContext.scale(transform.k, transform.k);
+        
+        links.forEach(d => {
+            context.beginPath();
+            context.moveTo(d.source.x, d.source.y);
+            context.lineTo(d.target.x, d.target.y);
+            context.globalAlpha = 0.6;
+            context.strokeStyle = "#999";
+            context.lineWidth = Math.sqrt(d.value);
+            context.stroke();
+            context.globalAlpha = 1;
+        });
+        
+        nodes.forEach((d, i) => {
+            context.beginPath();
+            context.arc(d.x, d.y, 5, 0, 2*Math.PI);
+            context.strokeStyle = "#fff";
+            context.lineWidth = 1.5;
+            context.stroke();
+            context.fillStyle = groupColour(d.group);
+            context.fill();
+            
+            idContext.beginPath();
+            idContext.arc(d.x, d.y, 5, 0, 2*Math.PI);
+            idContext.fillStyle = indexToColor(i);
+            idContext.fill();
+        });
+        context.restore();
+        idContext.restore();
+    }
+ 
+    function zoomed() {
+        transform = currentEvent.transform;
+        simulationUpdate();
+    }
+
+function dragsubject() {
+        const node = getNodeFromMouseEvent();
+        if (node) {
+            node.x = transform.applyX(node.x);
+            node.y = transform.applyY(node.y);
+        }
+        return node;
     }
 
     // This method of hit detection is poor on small devices because fat fingers
     // can't hit small targets. Alternatives:
     //  - add a hit radius to this (larger for small touch screens)
     //  - use simulation.find() with a hit radius (larger for small touch screens)
-    function getNodeFromMouseEvent(event) {
-        let mouse = getMousePos(canvas, event);
-        const color = idContext.getImageData(mouse.x, mouse.y, 1, 1).data;
+    function getNodeFromMouseEvent() {
+        let mouse = d3.mouse(context.canvas);
+        const color = idContext.getImageData(mouse[0], mouse[1], 1, 1).data;
         const index = colorToIndex(color);
         const node = nodes[index];
         return node;
     };
 
-    function getMousePos(canvas, event) {
-        var rect = canvas.getBoundingClientRect();
-        return {
-            x: event.clientX - rect.left,
-            y: event.clientY - rect.top
-        };
-    }
-
-    function resize() {
-        // ({ width, height } = canvas);
-        // console.log('resize()', width, height)
-    }
-
-    function indexToColor(index) {
-        const color = "#" + (index + 250).toString(16).padStart(6, "0");
-        return color;
-    }
-
-    function colorToIndex(color) {
-        const index = ((color[0] << 16) + (color[1] << 8) + color[2]) - 250;
-        return index;
-    }
-
     function dragstarted() {
         if (!currentEvent.active) simulation.alphaTarget(0.3).restart();
-        currentEvent.subject.fx = currentEvent.subject.x;
-        currentEvent.subject.fy = currentEvent.subject.y;
+        currentEvent.subject.fx = transform.invertX(currentEvent.subject.x);
+        currentEvent.subject.fy = transform.invertY(currentEvent.subject.y);
     }
 
     function dragged() {
-        currentEvent.subject.fx = currentEvent.x;
-        currentEvent.subject.fy = currentEvent.y;
+        currentEvent.subject.fx = transform.invertX(currentEvent.x);
+        currentEvent.subject.fy = transform.invertY(currentEvent.y);
     }
 
     function dragended() {
         if (!currentEvent.active) simulation.alphaTarget(0);
         currentEvent.subject.fx = null;
         currentEvent.subject.fy = null;
+    }
+
+    function indexToColor(index) {
+        const color = "#" + (index + 1).toString(16).padStart(6, "0");
+        return color;
+    }
+
+    function colorToIndex(color) {
+        const index = ((color[0] << 16) + (color[1] << 8) + color[2]) - 1;
+        return index;
+    }
+
+    function resize() {
+        ({ width, height } = canvas);
     }
 
 </script>
@@ -180,8 +190,6 @@ methods, see <code>getNodeFromMouseEvent()</code>.
 
 <style>
 	canvas {
-		/* width: 80%; */
-		/* height: 80%; */
 		float: left;
 	}
 </style>
