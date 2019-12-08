@@ -1,5 +1,6 @@
 <h2>d3 Force Directed Graph in Sveltejs - svg (zoom)</h2>
 <p>Uses SVG for the display and DOM elements for mouse handling.</p>
+
 <p>Features: hover, drag nodes, zoom and pan with mouse
 or touch screen. Note: on small touch screens you may need to 
 increase hit radius to hit a node with a 'fat finger'!</p>

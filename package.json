@@ -1,5 +1,5 @@
 {
-  "name": "svelte-app",
+  "name": "d3-fdg-svelte",
   "version": "1.0.0",
   "devDependencies": {
     "rollup": "^1.12.0",
