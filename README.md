@@ -2,13 +2,10 @@
 
 This project contains Svelte JS versions of the [D3 Force Directed Graph example](https://observablehq.com/@d3/force-directed-graph).
 
+## Svelte Implementations
 Each Svelte version is implemented as a file/component which can be tested
 by modifying `src/App.svelte` to select the one you wish to try. Or you can
 view the code and a live example using the 'REPL' links below.
-
-
-
-## Svelte Implementations
 
 1. **NetworkGraph.svelte** - uses `SVG` elements ([REPL](https://svelte.dev/repl/b74876c524734666ba44cb3fa5b48e90) or [REPL](https://svelte.dev/repl/01a5774b53e9416584428c025668407b?version=3.15.0) without d3-zoom)`*`
 2. **NetworkGraphCanvas.svelte** - uses `canvas` with D3 hit detection ([REPL](https://svelte.dev/repl/8b5800c9552440fbb51848504a3c46c9) or [REPL](https://svelte.dev/repl/498b9556c3254c56a2f6c7cfc206bfb1?version=3.16.0) without d3-zoom)
@@ -17,12 +14,12 @@ view the code and a live example using the 'REPL' links below.
     `*` In (1) only, I've added some axes but that's the only visual difference.
 
 ### Performance
-I'm planning to add the ability to create much larger networks in order to do some
-performance tests with tens to hundreds of thousands of nodes. It will be interesting 
-to see how the alternative hit detection methods of (2) and (3) compare. The former uses
-D3 `simulation.find()` while (3) uses a second `idContext` (drawing all the nodes a second
-time and using the colour of any hit to determine which node was hit).
+It will be interesting to see how the alternative hit detection methods of
+(2) and (3) compare. The former uses D3 `simulation.find()` while (3) 
+uses a second `idContext` (drawing all the nodes a second time and using 
+the colour of any hit to determine which node was hit).
 
+Work to compare performance of the above can be found in [d3-fdg-svelte-perf](https://github.com/theWebalyst/d3-fdg-svelte-perf)
 ### Touch Screens
 All should work with laptop, mobile and tablet touch screens (tested with Chrome and Firefox on Ubuntu and Android) but
 note:
