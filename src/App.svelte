@@ -1,5 +1,9 @@
 <script>
-	import Graph from './NetworkGraph.svelte';
+	import GraphSvelteSVG from './NetworkGraphSvelteSVG.svelte';
+	import GraphD3SVG from './NetworkGraphD3SVG.svelte';
+	import GraphCanvas from './NetworkGraphCanvas.svelte';
+	import GraphCanvasIdContext from './NetworkGraphCanvasIdContext.svelte';
+
 	import data from './data.js';
 </script>
 
@@ -15,5 +19,5 @@
 </style>
 
 <div class="chart">
-	<Graph graph={data}/>
+	<GraphD3SVG graph={data}/>
 </div>
