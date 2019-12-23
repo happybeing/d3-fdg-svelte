@@ -28,18 +28,6 @@ increase hit radius to hit a node with a 'fat finger'!</p>
 
     const padding = { top: 20, right: 40, bottom: 40, left: 25 };
 
-    $: xScale = scaleLinear()
-        .domain([0, 20])
-        .range([padding.left, width - padding.right]);
-
-    $: yScale = scaleLinear()
-        .domain([0, 12])
-        .range([height - padding.bottom, padding.top]);
-
-    $: d3yScale = scaleLinear()
-        .domain([0, height])
-        .range([height, 0]);
-
     $: links = graph.links.map(d => Object.create(d));
     $: nodes = graph.nodes.map(d => Object.create(d));  
 
