@@ -1,10 +1,20 @@
 <script>
-	import GraphSvelteSVG from './NetworkGraphSvelteSVG.svelte';
-	import GraphD3SVG from './NetworkGraphD3SVG.svelte';
-	import GraphCanvas from './NetworkGraphCanvas.svelte';
-	import GraphCanvasIdContext from './NetworkGraphCanvasIdContext.svelte';
+	import NetworkGraphSvelteSVG from './NetworkGraphSvelteSVG.svelte';
+	import NetworkGraphD3SVG from './NetworkGraphD3SVG.svelte';
+	import NetworkGraphCanvas from './NetworkGraphCanvas.svelte';
+	import NetworkGraphCanvasIdContext from './NetworkGraphCanvasIdContext.svelte';
 
 	import data from './data.js';
+
+	const graphList = [
+		{ name: 'NetworkGraphSvelteSVG', component: NetworkGraphSvelteSVG },
+		{ name: 'NetworkGraphD3SVG', component: NetworkGraphD3SVG },
+		{ name: 'NetworkGraphCanvas', component: NetworkGraphCanvas },
+		{ name: 'NetworkGraphCanvasIdContext', component: NetworkGraphCanvasIdContext },
+	];
+
+	let selectedGraph = graphList[2];
+
 </script>
 
 <style>
@@ -18,6 +28,12 @@
 	}
 </style>
 
+<div class="menu">
+	{#each graphList as graph}
+		<button on:click={() => { selectedGraph = graph; }}>{graph.name}</button>
+	{/each}
+</div>
+
 <div class="chart">
-	<GraphD3SVG graph={data}/>
+	<svelte:component this={selectedGraph.component} graph={data} />
 </div>

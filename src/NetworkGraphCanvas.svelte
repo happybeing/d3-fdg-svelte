@@ -11,12 +11,11 @@ increase hit radius to hit a node with a 'fat finger'!</p>
     import { scaleLinear, scaleOrdinal } from 'd3-scale';
     import { zoom, zoomIdentity } from 'd3-zoom';
     import { schemeCategory10 } from 'd3-scale-chromatic';
-    import { select, selectAll, mouse } from 'd3-selection';
+    import { select, selectAll, pointer } from 'd3-selection';
     import { drag } from 'd3-drag';
     import { forceSimulation, forceLink, forceManyBody, forceCenter } from 'd3-force';
 
-    import {event as currentEvent} from 'd3-selection'  // Needed to get drag working, see: https://github.com/d3/d3/issues/2733
-    let d3 = { zoom, zoomIdentity, scaleLinear, scaleOrdinal, schemeCategory10, select, selectAll, mouse, drag,  forceSimulation, forceLink, forceManyBody, forceCenter }
+    let d3 = { zoom, zoomIdentity, scaleLinear, scaleOrdinal, schemeCategory10, select, selectAll, pointer, drag,  forceSimulation, forceLink, forceManyBody, forceCenter }
 
     export let graph;
 
@@ -47,8 +46,8 @@ increase hit radius to hit a node with a 'fat finger'!</p>
         // title
         d3.select(context.canvas)
             .on("mousemove", () => {
-            const mouse = d3.mouse(context.canvas);
-            const d = simulation.find(transform.invertX(mouse[0]), transform.invertY(mouse[1]), nodeRadius);
+            const pointer = d3.pointer(context.canvas);
+            const d = simulation.find(transform.invertX(pointer[0]), transform.invertY(pointer[1]), nodeRadius);
             
             if (d) 
                 context.canvas.title = d.id;
@@ -96,13 +95,13 @@ increase hit radius to hit a node with a 'fat finger'!</p>
         context.restore();
     }
 
-    function zoomed() {
+    function zoomed(currentEvent) {
         transform = currentEvent.transform;
         simulationUpdate();
     }
 
     // Use the d3-force simulation to locate the node
-    function dragsubject() {
+    function dragsubject(currentEvent) {
         const node = simulation.find(transform.invertX(currentEvent.x), transform.invertY(currentEvent.y), nodeRadius);
         if (node) {
             node.x = transform.applyX(node.x);
@@ -111,18 +110,18 @@ increase hit radius to hit a node with a 'fat finger'!</p>
         return node;
     }
 
-    function dragstarted() {
+    function dragstarted(currentEvent) {
         if (!currentEvent.active) simulation.alphaTarget(0.3).restart();
         currentEvent.subject.fx = transform.invertX(currentEvent.subject.x);
         currentEvent.subject.fy = transform.invertY(currentEvent.subject.y);
     }
 
-    function dragged() {
+    function dragged(currentEvent) {
         currentEvent.subject.fx = transform.invertX(currentEvent.x);
         currentEvent.subject.fy = transform.invertY(currentEvent.y);
     }
 
-    function dragended() {
+    function dragended(currentEvent) {
         if (!currentEvent.active) simulation.alphaTarget(0);
         currentEvent.subject.fx = null;
         currentEvent.subject.fy = null;
