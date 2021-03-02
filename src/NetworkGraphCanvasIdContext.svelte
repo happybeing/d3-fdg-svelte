@@ -12,12 +12,11 @@ increase hit radius to hit a node with a 'fat finger'!</p>
     import { scaleLinear, scaleOrdinal } from 'd3-scale';
     import { zoom, zoomIdentity } from 'd3-zoom';
     import { schemeCategory10 } from 'd3-scale-chromatic';
-    import { select, selectAll, mouse } from 'd3-selection';
+    import { select, selectAll, pointer } from 'd3-selection';
     import { drag } from 'd3-drag';
     import { forceSimulation, forceLink, forceManyBody, forceCenter } from 'd3-force';
 
-    import {event as currentEvent} from 'd3-selection'  // Needed to get drag working, see: https://github.com/d3/d3/issues/2733
-    let d3 = { zoom, zoomIdentity, scaleLinear, scaleOrdinal, schemeCategory10, select, selectAll, mouse, drag,  forceSimulation, forceLink, forceManyBody, forceCenter }
+    let d3 = { zoom, zoomIdentity, scaleLinear, scaleOrdinal, schemeCategory10, select, selectAll, pointer, drag,  forceSimulation, forceLink, forceManyBody, forceCenter }
 
     export let graph;
 
@@ -48,8 +47,8 @@ increase hit radius to hit a node with a 'fat finger'!</p>
 
         // title
         d3.select(context.canvas).on("mousemove", tooltip);
-        function tooltip () {
-            const d = getNodeFromMouseEvent();
+        function tooltip (pointerEvent) {
+            const d = getNodeFromMouseEvent(pointerEvent);
             if (d)
                 context.canvas.title = d.id;
             else
@@ -110,13 +109,13 @@ increase hit radius to hit a node with a 'fat finger'!</p>
         idContext.restore();
     }
  
-    function zoomed() {
+    function zoomed(currentEvent) {
         transform = currentEvent.transform;
         simulationUpdate();
     }
 
-function dragsubject() {
-        const node = getNodeFromMouseEvent();
+function dragsubject(pointerEvent) {
+        const node = getNodeFromMouseEvent(pointerEvent);
         if (node) {
             node.x = transform.applyX(node.x);
             node.y = transform.applyY(node.y);
@@ -128,26 +127,26 @@ function dragsubject() {
     // can't hit small targets. Alternatives:
     //  - add a hit radius to this (larger for small touch screens)
     //  - use simulation.find() with a hit radius (larger for small touch screens)
-    function getNodeFromMouseEvent() {
-        let mouse = d3.mouse(context.canvas);
-        const color = idContext.getImageData(mouse[0], mouse[1], 1, 1).data;
+    function getNodeFromMouseEvent(pointerEvent) {
+        let pointer = d3.pointer(pointerEvent);
+        const color = idContext.getImageData(pointer[0], pointer[1], 1, 1).data;
         const index = colorToIndex(color);
         const node = nodes[index];
         return node;
     };
 
-    function dragstarted() {
+    function dragstarted(currentEvent) {
         if (!currentEvent.active) simulation.alphaTarget(0.3).restart();
         currentEvent.subject.fx = transform.invertX(currentEvent.subject.x);
         currentEvent.subject.fy = transform.invertY(currentEvent.subject.y);
     }
 
-    function dragged() {
+    function dragged(currentEvent) {
         currentEvent.subject.fx = transform.invertX(currentEvent.x);
         currentEvent.subject.fy = transform.invertY(currentEvent.y);
     }
 
-    function dragended() {
+    function dragended(currentEvent) {
         if (!currentEvent.active) simulation.alphaTarget(0);
         currentEvent.subject.fx = null;
         currentEvent.subject.fy = null;

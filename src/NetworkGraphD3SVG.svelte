@@ -5,7 +5,7 @@
 or touch screen. Note: on small touch screens you may need to 
 increase hit radius to hit a node with a 'fat finger'!</p>
 <script>
-    import { onMount } from 'svelte';
+    import { onMount, onDestroy } from 'svelte';
 
     import { scaleLinear, scaleOrdinal } from 'd3-scale';
     import { zoom, zoomIdentity } from 'd3-zoom';
@@ -14,7 +14,6 @@ increase hit radius to hit a node with a 'fat finger'!</p>
     import { drag } from 'd3-drag';
     import { forceSimulation, forceLink, forceManyBody, forceCenter } from 'd3-force';
 
-    import {event as currentEvent} from 'd3-selection'  // Needed to get drag working, see: https://github.com/d3/d3/issues/2733
     let d3 = { zoom, zoomIdentity, scaleLinear, scaleOrdinal, schemeCategory10, select, selectAll, drag,  forceSimulation, forceLink, forceManyBody, forceCenter }
 
     export let graph;
@@ -87,31 +86,36 @@ increase hit radius to hit a node with a 'fat finger'!</p>
                 .attr("cy", d => d.y)
             }
     
-        function zoomed() {
+        function zoomed(currentEvent) {
             g.attr("transform", currentEvent.transform)
             simulationUpdate();
         }
     });
 
-    function dragstarted() {
+    onDestroy(() => {
+        //d3.select(".chart").remove(svg);
+        svg.remove();
+    });
+
+    function dragstarted(currentEvent) {
         if (!currentEvent.active) simulation.alphaTarget(0.3).restart();
         currentEvent.subject.fx = currentEvent.x;
         currentEvent.subject.fy = currentEvent.y;
     }
 
-    function dragged() {
+    function dragged(currentEvent) {
         currentEvent.subject.fx = currentEvent.x;
         currentEvent.subject.fy = currentEvent.y;
     }
 
-    function dragended() {
+    function dragended(currentEvent) {
         if (!currentEvent.active) simulation.alphaTarget(0);
         currentEvent.subject.fx = null;
         currentEvent.subject.fy = null;
     }
 
     function resize() {
-        ({ width, height } = svg.getBoundingClientRect());
+        ({ width, height } = svg.node().getBoundingClientRect());
     }
 
 

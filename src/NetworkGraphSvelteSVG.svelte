@@ -14,7 +14,6 @@ increase hit radius to hit a node with a 'fat finger'!</p>
 	import { drag } from 'd3-drag';
 	import { forceSimulation, forceLink, forceManyBody, forceCenter } from 'd3-force';
 
-	import {event as currentEvent} from 'd3-selection'  // Needed to get drag working, see: https://github.com/d3/d3/issues/2733
 	let d3 = { zoom, zoomIdentity, scaleLinear, scaleOrdinal, schemeCategory10, select, selectAll, drag,  forceSimulation, forceLink, forceManyBody, forceCenter }
 
 	export let graph;
@@ -59,12 +58,12 @@ increase hit radius to hit a node with a 'fat finger'!</p>
 		links = [...links];
 	}
 
-    function zoomed() {
+    function zoomed(currentEvent) {
         transform = currentEvent.transform;
         simulationUpdate();
     }
 
-	function dragsubject() {
+	function dragsubject(currentEvent) {
         const node = simulation.find(transform.invertX(currentEvent.x), transform.invertY(currentEvent.y), nodeRadius);
         if (node) {
             node.x = transform.applyX(node.x);
@@ -73,18 +72,18 @@ increase hit radius to hit a node with a 'fat finger'!</p>
         return node;
 	}
 
-    function dragstarted() {
+    function dragstarted(currentEvent) {
         if (!currentEvent.active) simulation.alphaTarget(0.3).restart();
         currentEvent.subject.fx = transform.invertX(currentEvent.subject.x);
         currentEvent.subject.fy = transform.invertY(currentEvent.subject.y);
     }
 
-    function dragged() {
+    function dragged(currentEvent) {
         currentEvent.subject.fx = transform.invertX(currentEvent.x);
         currentEvent.subject.fy = transform.invertY(currentEvent.y);
     }
 
-    function dragended() {
+    function dragended(currentEvent) {
         if (!currentEvent.active) simulation.alphaTarget(0);
         currentEvent.subject.fx = null;
         currentEvent.subject.fy = null;
